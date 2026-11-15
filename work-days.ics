@@ -1,0 +1,63 @@
+BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//עיריית באר שבע//שינויים בתחנה המרכז
+ ית//HE
+CALSCALE:GREGORIAN
+METHOD:PUBLISH
+X-WR-CALNAME:שינויים זמניים בתחנה המרכזית בבאר
+  שבע
+X-WR-TIMEZONE:Asia/Jerusalem
+BEGIN:VTIMEZONE
+TZID:Asia/Jerusalem
+X-LIC-LOCATION:Asia/Jerusalem
+BEGIN:DAYLIGHT
+TZOFFSETFROM:+0200
+TZOFFSETTO:+0300
+TZNAME:IDT
+DTSTART:19700327T020000
+RRULE:FREQ=YEARLY;BYMONTH=3;BYDAY=-1FR
+END:DAYLIGHT
+BEGIN:STANDARD
+TZOFFSETFROM:+0300
+TZOFFSETTO:+0200
+TZNAME:IST
+DTSTART:19701025T020000
+RRULE:FREQ=YEARLY;BYMONTH=10;BYDAY=-1SU
+END:STANDARD
+END:VTIMEZONE
+BEGIN:VEVENT
+UID:kav-hasakhot-20261116@kav-hasakhot.vercel.app
+DTSTAMP:20261115T170000Z
+DTSTART;TZID=Asia/Jerusalem:20261116T090000
+DTEND;TZID=Asia/Jerusalem:20261116T170000
+SUMMARY:שינויים בתחנה המרכזית — יום ב׳ 16.11
+DESCRIPTION:בעקבות עבודות תשתית במפרצי התחנה ה
+ מרכזית בב"ש יחול שינוי זמני במיקום התחנו
+ ת.\nיום ב' 16.11 - ייסגר מפרץ 1 הצמוד לגדר מסיל
+ ת הרכבת – ויבוטלו זמנית סככות 1\, 2\, 3.\nשעו
+ ת העבודות: 9:00-17:00.\nhttps://kav-hasakhot.vercel.app/#day=16
+LOCATION:התחנה המרכזית בבאר שבע
+END:VEVENT
+BEGIN:VEVENT
+UID:kav-hasakhot-20261117@kav-hasakhot.vercel.app
+DTSTAMP:20261115T170000Z
+DTSTART;TZID=Asia/Jerusalem:20261117T090000
+DTEND;TZID=Asia/Jerusalem:20261117T170000
+SUMMARY:שינויים בתחנה המרכזית — יום ג׳ 17.11
+DESCRIPTION:ימים ג'\, ד' 17/18.11 - ייסגרו מפרצים 2\,3 ו
+ יבוטלו זמנית סככות 4 - 14.\nשעות העבודות: 9:00-
+ 17:00.\nhttps://kav-hasakhot.vercel.app/#day=17
+LOCATION:התחנה המרכזית בבאר שבע
+END:VEVENT
+BEGIN:VEVENT
+UID:kav-hasakhot-20261118@kav-hasakhot.vercel.app
+DTSTAMP:20261115T170000Z
+DTSTART;TZID=Asia/Jerusalem:20261118T090000
+DTEND;TZID=Asia/Jerusalem:20261118T170000
+SUMMARY:שינויים בתחנה המרכזית — יום ד׳ 18.11
+DESCRIPTION:ימים ג'\, ד' 17/18.11 - ייסגרו מפרצים 2\,3 ו
+ יבוטלו זמנית סככות 4 - 14.\nשעות העבודות: 9:00-
+ 17:00.\nhttps://kav-hasakhot.vercel.app/#day=18
+LOCATION:התחנה המרכזית בבאר שבע
+END:VEVENT
+END:VCALENDAR
