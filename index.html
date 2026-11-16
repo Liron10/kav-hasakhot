@@ -38,33 +38,38 @@
           height="69"
           alt="עיריית באר שבע – בירת ההזדמנויות של ישראל">
       </a>
-      <div class="brand-meta">
-        <p class="site-name">br7tnuaupdate</p>
-        <p class="brand-tag">מידע לציבור | התחנה המרכזית</p>
-      </div>
+      <p class="brand-tag">מידע לציבור | התחנה המרכזית</p>
     </div>
   </header>
 
   <div id="status-banner" class="status-banner" data-state="upcoming" hidden></div>
 
   <main id="main">
-    <!-- 1. הודעה עירונית -->
+    <!-- 1. הודעה עירונית + הוראות ברורות -->
     <section class="notice-hero" aria-labelledby="page-title">
       <h1 id="page-title">שינויים זמניים בסככות התחנה המרכזית</h1>
-      <p class="hero-meta"><span dir="ltr">16–18.11.2026</span> | עבודות תשתית</p>
-      <p class="hero-lede">בחרו יום ואת מספר הקו — ותדעו מיד מאיזו סככה לעלות. העבודות מתוכננות בשעות 09:00–17:00.</p>
+      <p class="hero-meta"><span dir="ltr">16–18.11.2026</span> | עבודות תשתית | שעות 09:00–17:00</p>
+      <ol class="howto" aria-label="איך להשתמש באתר">
+        <li><strong>בחרו יום</strong> — שני, שלישי או רביעי</li>
+        <li><strong>הקלידו את מספר הקו</strong> שלכם (למשל 13 או 2א)</li>
+        <li>אם יש כמה כיוונים — <strong>בחרו לאן נוסעים</strong></li>
+        <li>תראו מיד: <strong>סככה ישנה ← סככה חדשה</strong></li>
+      </ol>
+      <p class="hero-lede">אפשר לשמור <strong>קו אחד בלבד</strong> במכשיר, כדי לחזור אליו במהירות.</p>
     </section>
+
+    <div id="saved-line-panel" class="saved-line-panel" hidden></div>
 
     <!-- 2. בחירת יום -->
     <section class="panel" aria-labelledby="day-heading">
-      <h2 id="day-heading" class="panel-title">בחרו יום נסיעה</h2>
+      <h2 id="day-heading" class="panel-title"><span class="step-num" aria-hidden="true">1</span> בחרו יום נסיעה</h2>
       <div class="day-tabs" id="day-tabs" role="tablist" aria-labelledby="day-heading"></div>
       <p class="day-note" id="day-note"></p>
     </section>
 
     <!-- 3. חיפוש קו -->
     <section class="panel panel-search" id="search-section" aria-labelledby="search-heading">
-      <h2 id="search-heading" class="panel-title">איזה קו אתם מחפשים?</h2>
+      <h2 id="search-heading" class="panel-title"><span class="step-num" aria-hidden="true">2</span> איזה קו אתם מחפשים?</h2>
       <label class="sr-only" for="search">מספר קו או יעד נסיעה</label>
       <div class="search-box">
         <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>
@@ -72,11 +77,6 @@
         <button type="button" class="clear-btn" id="clear-btn" hidden aria-label="ניקוי בחירה">×</button>
       </div>
       <p id="search-hint" class="hint">לדוגמה: 2, 2א, 13, טרנר, רמות, ביג, חצרים</p>
-
-      <div class="fav-row" id="fav-row" hidden>
-        <p class="sub-label" id="fav-label">הקווים ששמרתי</p>
-        <div class="chips" id="fav-chips" role="group" aria-labelledby="fav-label"></div>
-      </div>
 
       <p class="sub-label" id="quick-label">בחירה מהירה</p>
       <div class="chips line-chips" id="quick-lines" role="group" aria-labelledby="quick-label"></div>
@@ -143,7 +143,7 @@
 
   <footer class="site-footer">
     <img class="footer-logo" src="assets/logo-beer-sheva-official.png" width="220" height="54" alt="עיריית באר שבע – בירת ההזדמנויות של ישראל">
-    <p><strong>br7tnuaupdate</strong><br>מידע לציבור | התחנה המרכזית<br>תודה על הסבלנות ושיתוף הפעולה</p>
+    <p>מידע לציבור | התחנה המרכזית<br>תודה על הסבלנות ושיתוף הפעולה</p>
   </footer>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>

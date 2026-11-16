@@ -318,10 +318,15 @@ export function allChangesForDay(dayId) {
 export function shareText(dayId, option) {
   const day = DAY_BY_ID[dayId];
   const title = formatResultTitle(option);
-  const detail = formatResultDetail(dayId, option);
-  let text = `שינויים בתחנה המרכזית | באר שבע\n${title}\nסככה ${option.to}\n${detail}`;
-  if (option.directionNote) text += `\nהערה: ${option.directionNote}`;
-  text += `\n${META.hoursNote}`;
+  const dayPart = day ? `${day.weekdayHe} ${day.shortDate}` : "";
+  let text = `שינויים בסככות התחנה המרכזית | באר שבע\n${title}\n`;
+  if (option.changed) {
+    text += `סככה קודמת: ${option.from}\nסככה חדשה: ${option.to}\nביום ${dayPart} — לכו לסככה ${option.to} במקום סככה ${option.from}.\n`;
+  } else {
+    text += `סככה: ${option.to}\nביום ${dayPart} — הסככה לא השתנתה.\n`;
+  }
+  if (option.directionNote) text += `הערה: ${option.directionNote}\n`;
+  text += META.hoursNote;
   return text;
 }
 

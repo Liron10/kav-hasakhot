@@ -23,7 +23,8 @@ import {
 } from "./engine.js";
 import { buildPlatformMap, focusMapOnPlatform, mapTextAlternative } from "./map.js";
 
-const FAV_KEY = "kav-hasakhot-favorites-v2";
+const SAVED_LINE_KEY = "br7tnuaupdate-saved-line-v1";
+const LEGACY_FAV_KEY = "kav-hasakhot-favorites-v2";
 const state = {
   day: defaultDayId(),
   query: "",
@@ -33,7 +34,7 @@ const state = {
   platformInspect: null,
 };
 
-let favorites = loadFavs();
+let savedLine = loadSavedLine();
 
 const $ = (id) => document.getElementById(id);
 const els = {
@@ -48,24 +49,33 @@ const els = {
   mapAlt: $("map-alt"),
   mapScroller: $("map-scroller"),
   changesList: $("changes-list"),
-  favRow: $("fav-row"),
-  favChips: $("fav-chips"),
+  savedPanel: $("saved-line-panel"),
   toast: $("toast"),
   platformPanel: $("platform-panel"),
   statusBanner: $("status-banner"),
 };
 
-function loadFavs() {
+/** שמירת קו אחד בלבד במכשיר */
+function loadSavedLine() {
   try {
-    const raw = JSON.parse(localStorage.getItem(FAV_KEY) || "[]");
-    return Array.isArray(raw) ? raw.filter((x) => QUICK_LINES.includes(x)) : [];
-  } catch {
-    return [];
-  }
+    const one = localStorage.getItem(SAVED_LINE_KEY);
+    if (one && QUICK_LINES.includes(one)) return one;
+    const legacy = JSON.parse(localStorage.getItem(LEGACY_FAV_KEY) || "[]");
+    if (Array.isArray(legacy) && legacy.length) {
+      const first = legacy.find((x) => QUICK_LINES.includes(x)) || null;
+      if (first) {
+        localStorage.setItem(SAVED_LINE_KEY, first);
+        localStorage.removeItem(LEGACY_FAV_KEY);
+        return first;
+      }
+    }
+  } catch {}
+  return null;
 }
-function saveFavs() {
+function persistSavedLine() {
   try {
-    localStorage.setItem(FAV_KEY, JSON.stringify(favorites));
+    if (savedLine) localStorage.setItem(SAVED_LINE_KEY, savedLine);
+    else localStorage.removeItem(SAVED_LINE_KEY);
   } catch {}
 }
 
@@ -180,48 +190,58 @@ function renderDayTabs() {
 function renderQuickLines() {
   const wrap = els.quickLines;
   wrap.innerHTML = "";
-  const ordered = [...favorites.filter((l) => QUICK_LINES.includes(l)), ...QUICK_LINES.filter((l) => !favorites.includes(l))];
+  const ordered = savedLine
+    ? [savedLine, ...QUICK_LINES.filter((l) => l !== savedLine)]
+    : QUICK_LINES.slice();
   ordered.forEach((line) => {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "line-chip" + (state.line === normalizeLine(line) ? " is-active" : "") + (favorites.includes(line) ? " is-fav" : "");
+    btn.className =
+      "line-chip" +
+      (state.line === normalizeLine(line) ? " is-active" : "") +
+      (savedLine === line ? " is-fav" : "");
     btn.setAttribute("aria-pressed", state.line === normalizeLine(line) ? "true" : "false");
     btn.innerHTML = `<span>קו ${escapeHtml(line)}</span>`;
-    const star = document.createElement("button");
-    star.type = "button";
-    star.className = "fav-toggle";
-    star.setAttribute("aria-label", favorites.includes(line) ? `הסרה ממועדפים, קו ${line}` : `שמירה במועדפים, קו ${line}`);
-    star.textContent = favorites.includes(line) ? "★" : "☆";
-    star.addEventListener("click", (e) => {
-      e.stopPropagation();
-      toggleFav(line);
-    });
-    btn.appendChild(star);
     btn.addEventListener("click", () => selectLine(line));
     wrap.appendChild(btn);
   });
-
-  if (favorites.length) {
-    els.favRow.hidden = false;
-    els.favChips.innerHTML = "";
-    favorites.forEach((line) => {
-      const b = document.createElement("button");
-      b.type = "button";
-      b.className = "line-chip is-fav" + (state.line === normalizeLine(line) ? " is-active" : "");
-      b.textContent = `קו ${line}`;
-      b.addEventListener("click", () => selectLine(line));
-      els.favChips.appendChild(b);
-    });
-  } else {
-    els.favRow.hidden = true;
-  }
+  renderSavedPanel();
 }
 
-function toggleFav(line) {
-  if (favorites.includes(line)) favorites = favorites.filter((x) => x !== line);
-  else favorites = favorites.concat(line);
-  saveFavs();
+function toggleSavedLine(line) {
+  const n = normalizeLine(line);
+  if (savedLine === n) {
+    savedLine = null;
+    showToast("הקו נמחק מהשמירה");
+  } else {
+    savedLine = n;
+    showToast(`נשמר קו ${n} בלבד במכשיר זה`);
+  }
+  persistSavedLine();
   renderQuickLines();
+  renderResultCard();
+}
+
+function renderSavedPanel() {
+  const panel = els.savedPanel;
+  if (!panel) return;
+  if (!savedLine) {
+    panel.hidden = true;
+    panel.innerHTML = "";
+    return;
+  }
+  panel.hidden = false;
+  panel.innerHTML = `
+    <div class="saved-line-card">
+      <p class="saved-kicker">הקו ששמרתם במכשיר</p>
+      <p class="saved-line-name">קו ${escapeHtml(savedLine)}</p>
+      <div class="saved-actions">
+        <button type="button" class="btn-primary" id="open-saved-line">הציגו את הסככה שלי</button>
+        <button type="button" class="btn-secondary" id="clear-saved-line">מחיקת שמירה</button>
+      </div>
+    </div>`;
+  $("open-saved-line")?.addEventListener("click", () => selectLine(savedLine));
+  $("clear-saved-line")?.addEventListener("click", () => toggleSavedLine(savedLine));
 }
 
 function selectLine(line) {
@@ -305,7 +325,11 @@ function renderDirectionPanel() {
 
 function announceResult(opt) {
   const title = formatResultTitle(opt);
-  els.liveRegion.textContent = `${title}, סככה ${opt.to}. ${formatResultDetail(state.day, opt)}`;
+  if (opt.changed) {
+    els.liveRegion.textContent = `${title}. סככה קודמת ${opt.from}, סככה חדשה ${opt.to}.`;
+  } else {
+    els.liveRegion.textContent = `${title}, סככה ${opt.to}. ${formatResultDetail(state.day, opt)}`;
+  }
 }
 
 function renderResultCard() {
@@ -317,17 +341,49 @@ function renderResultCard() {
   }
   const opt = state.option;
   const title = formatResultTitle(opt);
-  const detail = formatResultDetail(state.day, opt);
+  const day = DAY_BY_ID[state.day];
+  const dayLabel = day ? `${day.weekdayHe} ${day.shortDate}` : "";
+  const isSaved = state.line && savedLine === normalizeLine(state.line);
   card.hidden = false;
+
+  const compare = opt.changed
+    ? `<div class="compare-box" role="group" aria-label="השוואת סככות">
+        <div class="compare-col compare-old">
+          <span class="compare-label">סככה קודמת</span>
+          <span class="compare-num" aria-label="סככה קודמת ${opt.from}">${opt.from}</span>
+          <span class="compare-hint">אל תעלו כאן</span>
+        </div>
+        <div class="compare-arrow" aria-hidden="true">←</div>
+        <div class="compare-col compare-new">
+          <span class="compare-label">סככה חדשה</span>
+          <span class="compare-num" aria-label="סככה חדשה ${opt.to}">${opt.to}</span>
+          <span class="compare-hint">כאן עולים</span>
+        </div>
+      </div>
+      <p class="result-instruction"><strong>מה לעשות:</strong> ביום ${escapeHtml(dayLabel)} לכו לסככה <strong>${opt.to}</strong> במקום סככה ${opt.from}.</p>`
+    : `<div class="compare-box compare-same" role="group" aria-label="סככה ללא שינוי">
+        <div class="compare-col compare-new">
+          <span class="compare-label">הסככה שלכם</span>
+          <span class="compare-num" aria-label="סככה ${opt.to}">${opt.to}</span>
+          <span class="compare-hint">לא השתנתה ביום זה</span>
+        </div>
+      </div>
+      <p class="result-instruction"><strong>מה לעשות:</strong> ביום ${escapeHtml(dayLabel)} עולים מסככה <strong>${opt.to}</strong> כרגיל.</p>`;
+
   card.innerHTML = `
     <p class="result-kicker">${opt.kind === "dropoff" ? "תחנת הורדה" : "התשובה שלכם"}</p>
     <h2 id="result-heading" class="result-title">${escapeHtml(title)}</h2>
-    <p class="result-platform"><span class="result-platform-label">סככה</span><span class="result-platform-num" aria-label="סככה ${opt.to}">${opt.to}</span></p>
-    <p class="result-detail">${escapeHtml(detail)}</p>
-    ${opt.changed ? `<p class="result-move" aria-label="מעבר מסככה ${opt.from} לסככה ${opt.to}"><span>מסככה ${opt.from}</span><span class="move-arrow" aria-hidden="true">←</span><span>לסככה ${opt.to}</span></p>` : ""}
+    ${compare}
     ${opt.directionNote ? `<p class="result-note">${escapeHtml(opt.directionNote)}</p>` : ""}
     <div class="result-actions">
       <button type="button" class="btn-primary" id="show-on-map">הציגו לי במפה</button>
+      ${
+        state.line
+          ? `<button type="button" class="btn-secondary" id="save-line-btn">${
+              isSaved ? "הסרת הקו השמור" : "שמירת הקו שלי (אחד בלבד)"
+            }</button>`
+          : ""
+      }
       <button type="button" class="btn-secondary" id="copy-result">העתקת הודעה</button>
       <button type="button" class="btn-secondary" id="wa-result">שיתוף בוואטסאפ</button>
     </div>
@@ -337,6 +393,7 @@ function renderResultCard() {
     const svg = els.mapMount.querySelector("svg");
     focusMapOnPlatform(els.mapScroller, svg, opt.to);
   });
+  $("save-line-btn")?.addEventListener("click", () => toggleSavedLine(state.line));
   $("copy-result")?.addEventListener("click", () => copyResult());
   $("wa-result")?.addEventListener("click", () => shareWhatsApp());
 }
