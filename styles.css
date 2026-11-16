@@ -616,7 +616,7 @@ main {
 .map-scroller {
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  max-height: min(70vh, 640px);
+  max-height: min(70vh, 560px);
   border: 1px solid var(--line);
   border-radius: 12px;
   background: #F5F8FA;
@@ -625,8 +625,30 @@ main {
 .platform-map-svg {
   display: block;
   width: 100%;
-  min-width: 640px;
+  min-width: 560px;
   height: auto;
+}
+/* במחשב — המפה במלואה בלי גלילה פנימית ארוכה */
+@media (min-width: 768px) {
+  main {
+    max-width: 980px;
+  }
+  .map-scroller {
+    max-height: none;
+    overflow: visible;
+    display: flex;
+    justify-content: center;
+    padding: 8px;
+  }
+  .platform-map-svg {
+    min-width: 0;
+    width: auto;
+    max-width: 100%;
+    height: min(82vh, 980px);
+  }
+  .map-toolbar {
+    justify-content: flex-start;
+  }
 }
 .map-alt {
   margin: 10px 0 0;
